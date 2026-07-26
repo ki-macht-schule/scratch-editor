@@ -24,7 +24,8 @@ const builtinExtensions = {
     makeymakey: () => require('../extensions/scratch3_makeymakey'),
     boost: () => require('../extensions/scratch3_boost'),
     gdxfor: () => require('../extensions/scratch3_gdx_for'),
-    faceSensing: () => require('../extensions/scratch3_face_sensing')
+    faceSensing: () => require('../extensions/scratch3_face_sensing'),
+    kiwitm: () => require('../extensions/scratch3_kiwi_tm')
 };
 
 /**
