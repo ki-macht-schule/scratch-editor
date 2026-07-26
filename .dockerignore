@@ -1,0 +1,8 @@
+# Keep the build context lean when building locally (CI builds from a clean git
+# context and never sees these anyway).
+.git
+node_modules
+**/node_modules
+**/build
+**/dist
+**/.cache
