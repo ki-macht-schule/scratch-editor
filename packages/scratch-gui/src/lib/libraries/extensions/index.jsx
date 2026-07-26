@@ -49,7 +49,24 @@ import gdxforConnectionSmallIconURL from './gdxfor/gdxfor-small.svg';
 import faceSensingIconURL from './faceSensing/faceSensing.png';
 import faceSensingInsetIconURL from './faceSensing/faceSensing-small.svg';
 
+import kiwitmIconURL from './kiwitm/kiwitm.svg';
+import kimsLogoURL from './kiwitm/kims-logo.svg';
+
 export default [
+    {
+        name: 'Kiwi TM',
+        extensionId: 'kiwitm',
+        iconURL: kimsLogoURL,
+        insetIconURL: kiwitmIconURL,
+        description: (
+            <FormattedMessage
+                defaultMessage="Bringe dein im Kiwi-Trainer trainiertes Teachable-Machine-Modell nach Scratch und erkenne damit Objekte per Kamera."
+                description="Description for the 'Kiwi TM' extension"
+                id="gui.extension.kiwitm.description"
+            />
+        ),
+        featured: true
+    },
     {
         name: (
             <FormattedMessage
