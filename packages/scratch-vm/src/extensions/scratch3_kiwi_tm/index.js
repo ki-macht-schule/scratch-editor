@@ -12,13 +12,20 @@ const Video = require('../../io/video');
 const DB_NAME = 'kiwi-tm-handoff';
 const STORE = 'kv';
 const KEY_MODEL = 'handoff-model:scratch'; // model-only .zip (model.json, weights.bin, metadata.json)
+const KEY_META = 'handoff-meta:scratch'; // { schemaVersion, target, labels, savedAt }
+
+// Data-contract version this consumer understands. MUST match the writer's
+// HANDOFF_SCHEMA_VERSION in apps/teachable-machine/src/util/modelHandoff.ts. A
+// model from an incompatible future trainer is refused instead of crashing on
+// mismatched bytes. See teachable-machine/CONTRACT.md.
+const SCHEMA_VERSION = 1;
 
 // The trainer is opened in a new tab:
 //  - return=close: hand off via IndexedDB and post `kiwi-model-updated` back to
 //    this tab, then close.
 //  - restore=1: reload the previously handed-off project so the student keeps
 //    training instead of starting over (no-op on the first open).
-const TRAINER_URL = '/teachable-machine/image/general?target=scratch&return=close&restore=1';
+const TRAINER_URL = '/teachable-machine/launch?target=scratch&contract=1&return=close&restore=1';
 
 // How often the webcam frame is classified while the camera is on.
 const PREDICT_INTERVAL_MS = 200;
@@ -157,9 +164,17 @@ class ScratchKiwiTM {
                 return;
             }
             const zipBlob = await idbGet(db, KEY_MODEL);
+            const handoffMeta = await idbGet(db, KEY_META);
             db.close();
             if (!zipBlob) {
                 log.warn('kiwi-tm: no model in hand-off; train a model first');
+                return;
+            }
+            if (handoffMeta && handoffMeta.schemaVersion !== SCHEMA_VERSION) {
+                log.error(
+                    `kiwi-tm: hand-off schema mismatch (got v${handoffMeta.schemaVersion}, ` +
+                    `expected v${SCHEMA_VERSION}); ignoring model. See teachable-machine/CONTRACT.md`
+                );
                 return;
             }
 
