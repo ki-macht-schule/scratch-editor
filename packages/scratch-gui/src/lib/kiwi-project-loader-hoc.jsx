@@ -50,7 +50,8 @@ const KiwiProjectLoaderHOC = function (WrappedComponent) {
             super(props);
             bindAll(this, [
                 'fetchProject',
-                'loadIntoVM'
+                'loadIntoVM',
+                'finishLoad'
             ]);
             this.projectUrl = getKiwiProjectUrl();
             // Optional display title (the .sb3/project.json carries no title);
@@ -122,18 +123,41 @@ const KiwiProjectLoaderHOC = function (WrappedComponent) {
                     alert(KIWI_LOAD_ERROR); // eslint-disable-line no-alert
                 })
                 .then(() => {
-                    this.props.onLoadingFinished(this.props.loadingState, success);
-                    // A freshly seeded project is unmodified: don't fire the
-                    // unsaved-changes guard until the student actually edits.
-                    this.props.onProjectUnchanged();
+                    // Finish on a fresh macrotask, not inline. Loading an
+                    // extension-backed project makes scratch-blocks emit a
+                    // one-time, benign flyout-render error in the same tick
+                    // loadProject settles; completing synchronously here strands
+                    // the loading modal open (the state-transition re-render can
+                    // throw before the modal is closed). A deferred completion
+                    // runs on a clean render -- verified: a delayed close always
+                    // applies.
+                    setTimeout(() => this.finishLoad(success), 0);
                 });
+        }
+        // Each step isolated, and the modal close dispatched last and on its own,
+        // so neither the project-state transition nor the unchanged-flag can
+        // strand the loading modal open if their re-render throws.
+        finishLoad (success) {
+            const step = fn => {
+                try {
+                    fn();
+                } catch (e) {
+                    log.error('kiwi-project: completion step failed', e);
+                }
+            };
+            step(() => this.props.onLoadedProject(this.props.loadingState, success));
+            // A freshly seeded project is unmodified: don't fire the
+            // unsaved-changes guard until the student actually edits.
+            step(() => this.props.onProjectUnchanged());
+            step(() => this.props.onCloseLoading());
         }
         render () {
             const {
                 isLoadingUpload,
                 isShowingWithoutId,
                 loadingState,
-                onLoadingFinished,
+                onCloseLoading,
+                onLoadedProject: onLoadedProjectProp,
                 onLoadingStarted,
                 onProjectUnchanged,
                 onSetProjectTitle,
@@ -154,7 +178,8 @@ const KiwiProjectLoaderHOC = function (WrappedComponent) {
         isLoadingUpload: PropTypes.bool,
         isShowingWithoutId: PropTypes.bool,
         loadingState: PropTypes.oneOf(LoadingStates),
-        onLoadingFinished: PropTypes.func,
+        onCloseLoading: PropTypes.func,
+        onLoadedProject: PropTypes.func,
         onLoadingStarted: PropTypes.func,
         onProjectUnchanged: PropTypes.func,
         onSetProjectTitle: PropTypes.func,
@@ -173,11 +198,10 @@ const KiwiProjectLoaderHOC = function (WrappedComponent) {
         };
     };
     const mapDispatchToProps = (dispatch, ownProps) => ({
-        onLoadingFinished: (loadingState, success) => {
-            dispatch(onLoadedProject(loadingState, ownProps.canSave, success));
-            dispatch(closeLoadingProject());
-        },
         onLoadingStarted: () => dispatch(openLoadingProject()),
+        onCloseLoading: () => dispatch(closeLoadingProject()),
+        onLoadedProject: (loadingState, success) =>
+            dispatch(onLoadedProject(loadingState, ownProps.canSave, success)),
         onProjectUnchanged: () => dispatch(setProjectUnchanged()),
         onSetProjectTitle: title => dispatch(setProjectTitle(title)),
         requestProjectUpload: loadingState => dispatch(requestProjectUpload(loadingState))
