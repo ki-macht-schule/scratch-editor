@@ -230,13 +230,23 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
         dispatchProps.onShowLoading();
         fetchKiwiProjectBuffer(kiwiProjectUrl)
             .then(buffer => stateProps.vm.loadProject(buffer))
-            // Re-seeded == pristine: don't trip the unsaved-changes guard.
-            .then(() => dispatchProps.onProjectUnchanged())
             .catch(err => {
                 log.error(err);
                 alert(KIWI_LOAD_ERROR); // eslint-disable-line no-alert
             })
-            .then(() => dispatchProps.onHideLoading());
+            // Finish on a fresh macrotask with the modal close isolated last.
+            // Reloading an extension-backed template makes scratch-blocks emit a
+            // one-time, benign flyout-render error in the same tick loadProject
+            // settles; completing inline can strand the loading modal open.
+            .then(() => setTimeout(() => {
+                // Re-seeded == pristine: don't trip the unsaved-changes guard.
+                try {
+                    dispatchProps.onProjectUnchanged();
+                } catch (e) {
+                    log.error(e);
+                }
+                dispatchProps.onHideLoading();
+            }, 0));
     };
     return Object.assign({}, ownProps, stateProps, dispatchProps, {
         kiwiProjectUrl,
