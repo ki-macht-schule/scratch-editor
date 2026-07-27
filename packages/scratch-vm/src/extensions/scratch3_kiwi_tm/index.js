@@ -6,10 +6,12 @@ const tf = require('@tensorflow/tfjs');
 const Video = require('../../io/video');
 
 // Same-origin hand-off written by the Teachable-Machine trainer. Must stay in
-// sync with apps/teachable-machine/src/util/modelHandoff.ts.
+// sync with apps/teachable-machine/src/util/modelHandoff.ts. Slots are
+// per-target (`<base>:<target>`); scratch only reads its own model, so a
+// race/rex/notebook model can never leak into a Scratch project.
 const DB_NAME = 'kiwi-tm-handoff';
 const STORE = 'kv';
-const KEY_MODEL = 'handoff-model'; // model-only .zip (model.json, weights.bin, metadata.json)
+const KEY_MODEL = 'handoff-model:scratch'; // model-only .zip (model.json, weights.bin, metadata.json)
 
 // The trainer is opened in a new tab:
 //  - return=close: hand off via IndexedDB and post `kiwi-model-updated` back to
