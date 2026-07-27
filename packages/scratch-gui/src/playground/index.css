@@ -18,9 +18,14 @@ body,
     height: calc(100% - 28px);
 }
 
-/* kiwi: slim, always-visible footer with the legal + AGPL source links
-   (markup in index.ejs). Understated Scratch-grey chrome. */
-.kiwi-footer {
+/* kiwi: slim, always-visible footer with the legal + AGPL source links.
+   The markup lives in index.ejs as a *static* <footer class="kiwi-footer">,
+   but this file is imported as a CSS module (see `styles.app` in index.jsx),
+   so every class name here is hashed. `:global()` opts these rules out of the
+   hashing so they actually match the literal `kiwi-footer` class in the HTML;
+   without it the footer renders completely unstyled and drops to the top of
+   the document flow. Understated Scratch-grey chrome. */
+:global(.kiwi-footer) {
     position: fixed;
     left: 0;
     right: 0;
@@ -37,12 +42,12 @@ body,
     color: #575e75;
 }
 
-.kiwi-footer a {
+:global(.kiwi-footer) a {
     color: #575e75;
     text-decoration: none;
 }
 
-.kiwi-footer a:hover {
+:global(.kiwi-footer) a:hover {
     text-decoration: underline;
 }
 
