@@ -25,7 +25,14 @@ const READER_VERSION = 1;
 //    this tab, then close.
 //  - restore=1: reload the previously handed-off project so the student keeps
 //    training instead of starting over (no-op on the first open).
-const TRAINER_URL = '/teachable-machine/launch?target=scratch&contract=1&return=close&restore=1';
+// If Scratch itself was opened embedded in the LMS (?ctx=lti), forward that to
+// the trainer so it hides platform chrome. Scratch opens the trainer in a new
+// tab (return=close) and stays alive, so only the outbound URL needs ctx. See
+// teachable-machine/CONTRACT.md.
+const IS_LTI = typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('ctx') === 'lti';
+const TRAINER_URL = '/teachable-machine/launch?target=scratch&contract=1&return=close&restore=1' +
+    (IS_LTI ? '&ctx=lti' : '');
 
 // How often the webcam frame is classified while the camera is on.
 const PREDICT_INTERVAL_MS = 200;
