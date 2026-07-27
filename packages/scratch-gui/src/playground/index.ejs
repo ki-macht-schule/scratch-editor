@@ -23,14 +23,20 @@
       <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<%- htmlWebpackPlugin.options.gtm_id %><%= htmlWebpackPlugin.options.gtm_env_auth %>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <!-- End Google Tag Manager (noscript) -->
     <% } %>
-    <!-- GNU AGPL v3 section 13: this is our MODIFIED Scratch editor served over
-         a network, so we must offer the Corresponding Source of the running
-         version. The public fork's `kiwi` branch IS the deployed source and
-         doubles as the image tag (scratch-editor:kiwi). -->
-    <a href="https://github.com/ki-macht-schule/scratch-editor/tree/kiwi"
-       target="_blank" rel="noopener noreferrer"
-       style="position:fixed;right:6px;bottom:4px;z-index:9999;font:11px/1.4 sans-serif;color:#575e75;opacity:.7;text-decoration:none">
-      Quellcode (GNU AGPL v3)
-    </a>
+    <!-- Kiwi footer: Datenschutz + Impressum are same-origin homescreen routes
+         (staging.kiwi.schule/datenschutz|/impressum), reachable from /scratch.
+         The Quellcode link is the GNU AGPL v3 section 13 offer: this is our
+         MODIFIED Scratch editor served over a network, so we must offer the
+         Corresponding Source of the running version -- the public fork's `kiwi`
+         branch IS the deployed source (and the image tag scratch-editor:kiwi).
+         All open in a new tab because the app sets `onbeforeunload` in prod, so
+         a same-tab click would warn and risk losing the student's work. -->
+    <footer class="kiwi-footer">
+      <a href="/datenschutz" target="_blank" rel="noopener noreferrer">Datenschutzerklärung</a>
+      <span aria-hidden="true">&middot;</span>
+      <a href="/impressum" target="_blank" rel="noopener noreferrer">Impressum</a>
+      <span aria-hidden="true">&middot;</span>
+      <a href="https://github.com/ki-macht-schule/scratch-editor/tree/kiwi" target="_blank" rel="noopener noreferrer">Quellcode (GNU AGPL v3)</a>
+    </footer>
   </body>
 </html>

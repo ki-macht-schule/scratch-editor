@@ -11,5 +11,40 @@ body,
     min-height: 640px; /* Min height to fit sprite/backdrop button */
 }
 
+/* kiwi: reserve room for the fixed Kiwi footer so the GUI (which fills
+   height:100% of .app) ends above it, instead of the stage/sprite row being
+   hidden behind the footer bar. Keep this in sync with .kiwi-footer height. */
+.app {
+    height: calc(100% - 28px);
+}
+
+/* kiwi: slim, always-visible footer with the legal + AGPL source links
+   (markup in index.ejs). Understated Scratch-grey chrome. */
+.kiwi-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 28px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #e9edf1;
+    border-top: 1px solid #d9dfe6;
+    font: 12px/1 "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #575e75;
+}
+
+.kiwi-footer a {
+    color: #575e75;
+    text-decoration: none;
+}
+
+.kiwi-footer a:hover {
+    text-decoration: underline;
+}
+
 /* @todo: move globally? Safe / side FX, for blocks particularly? */
 * { box-sizing: border-box; }
