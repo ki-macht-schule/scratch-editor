@@ -13,8 +13,16 @@ import dropdownCaret from './dropdown-caret.svg';
 import useMenuNavigation from '../../hooks/use-menu-navigation';
 
 import sharedMessages from '../../lib/shared-messages';
+import log from '../../lib/log';
+import {KIWI_LOAD_ERROR, getKiwiProjectUrl, fetchKiwiProjectBuffer} from '../../lib/kiwi-project';
 
 import {saveProjectAsCopy} from '../../reducers/project-state';
+import {setProjectUnchanged} from '../../reducers/project-changed';
+import {openLoadingProject, closeLoadingProject} from '../../reducers/modals';
+
+// Confirm before discarding: resetting reloads the seed and wipes edits.
+const KIWI_RESET_CONFIRM =
+    'Auf Übungsvorlage zurücksetzen? Dein aktueller Fortschritt geht dabei verloren.';
 
 const fileMenu = defineMessage({
     id: 'gui.aria.fileMenu',
@@ -34,7 +42,9 @@ const FileMenu = ({
     onStartSelectingFileUpload,
     getSaveToComputerHandler,
     remixMessage,
-    depth
+    depth,
+    kiwiProjectUrl,
+    onResetToTemplate
 }) => {
     const intl = useIntl();
 
@@ -161,6 +171,17 @@ const FileMenu = ({
                         </MenuItem>
                     )}</SB3Downloader>
                 </MenuSection>
+                {kiwiProjectUrl && (
+                    <MenuSection>
+                        <MenuItem
+                            onClick={onResetToTemplate}
+                            isDataMenuItem
+                            onParentKeyDown={handleKeyDownOpenMenu}
+                        >
+                            {'Auf Übungsvorlage zurücksetzen'}
+                        </MenuItem>
+                    </MenuSection>
+                )}
             </MenuBarMenu>
         </button>
     );
@@ -178,18 +199,53 @@ FileMenu.propTypes = {
     onClickNew: PropTypes.func.isRequired,
     getSaveToComputerHandler: PropTypes.func.isRequired,
     remixMessage: PropTypes.node,
-    depth: PropTypes.number
+    depth: PropTypes.number,
+    kiwiProjectUrl: PropTypes.string,
+    onResetToTemplate: PropTypes.func
 };
 
 const mapStateToProps = state => ({
-    isRtl: state.locales.isRtl
+    isRtl: state.locales.isRtl,
+    vm: state.scratchGui.vm
 });
 
 const mapDispatchToProps = dispatch => ({
-    onClickSaveAsCopy: () => dispatch(saveProjectAsCopy())
+    onClickSaveAsCopy: () => dispatch(saveProjectAsCopy()),
+    onShowLoading: () => dispatch(openLoadingProject()),
+    onHideLoading: () => dispatch(closeLoadingProject()),
+    onProjectUnchanged: () => dispatch(setProjectUnchanged())
 });
+
+// Kiwi: the reset handler is assembled here (not in the component body) so the
+// JSX passes a prop reference -- react/jsx-no-bind forbids arrow handlers
+// defined inside render. ``kiwiProjectUrl`` is only truthy when the editor was
+// opened from a content project (`?kiwi_project=`); the menu item is hidden
+// otherwise. Resetting re-fetches the pristine template and reloads it.
+const mergeProps = (stateProps, dispatchProps, ownProps) => {
+    const kiwiProjectUrl = getKiwiProjectUrl();
+    const onResetToTemplate = () => {
+        if (!confirm(KIWI_RESET_CONFIRM)) { // eslint-disable-line no-alert
+            return;
+        }
+        dispatchProps.onShowLoading();
+        fetchKiwiProjectBuffer(kiwiProjectUrl)
+            .then(buffer => stateProps.vm.loadProject(buffer))
+            // Re-seeded == pristine: don't trip the unsaved-changes guard.
+            .then(() => dispatchProps.onProjectUnchanged())
+            .catch(err => {
+                log.error(err);
+                alert(KIWI_LOAD_ERROR); // eslint-disable-line no-alert
+            })
+            .then(() => dispatchProps.onHideLoading());
+    };
+    return Object.assign({}, ownProps, stateProps, dispatchProps, {
+        kiwiProjectUrl,
+        onResetToTemplate
+    });
+};
 
 export default connect(
     mapStateToProps,
-    mapDispatchToProps
+    mapDispatchToProps,
+    mergeProps
 )(FileMenu);

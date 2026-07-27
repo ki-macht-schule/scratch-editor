@@ -5,6 +5,7 @@ import {compose} from 'redux';
 import AppStateHOC from '../lib/app-state-hoc.jsx';
 import GUI from '../containers/gui.jsx';
 import HashParserHOC from '../lib/hash-parser-hoc.jsx';
+import KiwiProjectLoaderHOC from '../lib/kiwi-project-loader-hoc.jsx';
 import log from '../lib/log.js';
 import {PLATFORM} from '../lib/platform.js';
 
@@ -37,7 +38,11 @@ export default appTarget => {
     // ability to compose reducers.
     const WrappedGui = compose(
         AppStateHOC,
-        HashParserHOC
+        HashParserHOC,
+        // kiwi: seed the editor from a `?kiwi_project=` content URL (no-op
+        // without the param). Inside AppStateHOC so it can reach the redux
+        // store (vm + project loading state).
+        KiwiProjectLoaderHOC
     )(GUI);
 
     // TODO a hack for testing the backpack, allow backpack host to be set by url param
