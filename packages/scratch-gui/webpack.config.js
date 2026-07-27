@@ -164,6 +164,12 @@ const distStandaloneConfig = baseConfig.clone()
 const buildConfig = baseConfig.clone()
     .enableDevServer(process.env.PORT || 8601)
     .merge({
+        // kiwi: the base config forces 'cheap-module-source-map' even in
+        // production; source maps for this huge bundle balloon webpack's peak
+        // RSS and OOM small self-hosted build hosts. We don't ship maps for the
+        // served editor, so drop them in production while keeping them for the
+        // local dev server.
+        devtool: process.env.NODE_ENV === 'production' ? false : 'cheap-module-source-map',
         entry: {
             gui: './src/playground/index.jsx',
             guistandalone: './src/playground/standalone.jsx',

@@ -27,10 +27,17 @@ WORKDIR /app
 COPY . .
 
 RUN npm ci
-# Production build. Without NODE_ENV=production, scratch-gui's default build emits
-# eval source maps (development mode) that OOM the builder; NODE_ENV=production
-# yields the minified editor in packages/scratch-gui/build -- both lighter to
-# build and the correct artifact to deploy.
+# Production build. NODE_ENV=production yields the minified editor in
+# packages/scratch-gui/build -- the artifact nginx serves below.
+#
+# Memory-lean for small self-hosted build hosts (kiwi fork changes):
+#   - scratch-gui's `build` script builds ONLY build:dev (-> build/, the served
+#     editor). Upstream also builds dist/ + dist-standalone (library bundles we
+#     never ship) -- 3x the webpack work; we dropped the two unused ones.
+#   - webpack.config.js disables source maps in production (the base config's
+#     'cheap-module-source-map' was the main driver of the multi-GB peak RSS).
+# Together these keep the single remaining webpack run well under the heap cap
+# above so it no longer OOMs a ~8GB host running the live services alongside it.
 RUN NODE_ENV=production npm run build
 
 FROM nginx:alpine
