@@ -14,11 +14,11 @@ const STORE = 'kv';
 const KEY_MODEL = 'handoff-model:scratch'; // model-only .zip (model.json, weights.bin, metadata.json)
 const KEY_META = 'handoff-meta:scratch'; // { schemaVersion, target, labels, savedAt }
 
-// Data-contract version this consumer understands. MUST match the writer's
-// HANDOFF_SCHEMA_VERSION in apps/teachable-machine/src/util/modelHandoff.ts. A
-// model from an incompatible future trainer is refused instead of crashing on
-// mismatched bytes. See teachable-machine/CONTRACT.md.
-const SCHEMA_VERSION = 1;
+// Highest hand-off format version this extension understands. A model is
+// accepted iff its `minReaderVersion` (the compat gate the trainer declares) is
+// <= this, so newer-but-backward-compatible models still load; one needing a
+// newer reader is refused instead of crashing. See teachable-machine/CONTRACT.md.
+const READER_VERSION = 1;
 
 // The trainer is opened in a new tab:
 //  - return=close: hand off via IndexedDB and post `kiwi-model-updated` back to
@@ -170,12 +170,16 @@ class ScratchKiwiTM {
                 log.warn('kiwi-tm: no model in hand-off; train a model first');
                 return;
             }
-            if (handoffMeta && handoffMeta.schemaVersion !== SCHEMA_VERSION) {
-                log.error(
-                    `kiwi-tm: hand-off schema mismatch (got v${handoffMeta.schemaVersion}, ` +
-                    `expected v${SCHEMA_VERSION}); ignoring model. See teachable-machine/CONTRACT.md`
-                );
-                return;
+            if (handoffMeta) {
+                const need = handoffMeta.minReaderVersion == null ?
+                    handoffMeta.schemaVersion : handoffMeta.minReaderVersion;
+                if (need > READER_VERSION) {
+                    log.error(
+                        `kiwi-tm: hand-off needs reader v${need} (this understands v${READER_VERSION}); ` +
+                        `ignoring model. See teachable-machine/CONTRACT.md`
+                    );
+                    return;
+                }
             }
 
             const zip = await JSZip.loadAsync(zipBlob);
