@@ -51,6 +51,14 @@ body .alert {
     vertical-align: middle;
 }
 
+/* Fruit PNG is 685px; without a cap it blows the banner. Other
+   alert icons (20px success/fail, extension small) stay untouched. */
+.alert-icon[src$="kiwi_logo.png"] {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
 .alert-message {
     color: #555;
     font-weight: bold;

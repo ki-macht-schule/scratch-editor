@@ -162,12 +162,14 @@ const closeAlertWithId = function (alertId) {
 /**
  * Action creator to show an alert with the given alertId.
  * @param {string} alertId - id string of the alert to show
+ * @param {object} [data] - optional payload; ``message`` replaces the catalog text
  * @returns {object} - an object to be passed to the reducer.
  */
-const showStandardAlert = function (alertId) {
+const showStandardAlert = function (alertId, data) {
     return {
         type: SHOW_ALERT,
-        alertId
+        alertId,
+        data
     };
 };
 
@@ -191,10 +193,10 @@ const showExtensionAlert = function (data) {
  * @param {object} dispatch - dispatch function
  * @param {string} alertId - the ID of the alert
  */
-const showAlertWithTimeout = function (dispatch, alertId) {
+const showAlertWithTimeout = function (dispatch, alertId, data) {
     const alertData = alertsData.find(thisAlertData => thisAlertData.alertId === alertId);
     if (alertData) {
-        dispatch(showStandardAlert(alertId));
+        dispatch(showStandardAlert(alertId, data));
         if (alertData.maxDisplaySecs) {
             setTimeout(() => {
                 dispatch(closeAlertsWithId(alertId));

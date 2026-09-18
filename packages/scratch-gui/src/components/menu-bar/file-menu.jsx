@@ -14,7 +14,11 @@ import useMenuNavigation from '../../hooks/use-menu-navigation';
 
 import sharedMessages from '../../lib/shared-messages';
 import log from '../../lib/log';
-import {KIWI_LOAD_ERROR, getKiwiProjectUrl, fetchKiwiProjectBuffer} from '../../lib/kiwi-project';
+import {
+    KIWI_LOAD_ERROR,
+    getKiwiProjectUrl,
+    fetchKiwiProjectBuffer
+} from '../../lib/kiwi-project';
 
 import {saveProjectAsCopy} from '../../reducers/project-state';
 import {setProjectUnchanged} from '../../reducers/project-changed';

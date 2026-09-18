@@ -24,6 +24,7 @@ import LoginDropdown from './login-dropdown.jsx';
 import MenuBarHOC from '../../containers/menu-bar-hoc.jsx';
 import SettingsMenu from './settings-menu.jsx';
 import FileMenu from './file-menu.jsx';
+import KiwiSaveButton from './kiwi-save-button.jsx';
 import EditMenu from './edit-menu.jsx';
 import ModeMenu from './mode-menu.jsx';
 import AboutMenu from './about-menu.jsx';
@@ -365,6 +366,7 @@ class MenuBar extends React.Component {
                             remixMessage={remixMessage}
                             depth={1}
                         />)}
+                        <KiwiSaveButton />
                         <EditMenu
                             isRtl={this.props.isRtl}
                             onRestoreOption={this.handleRestoreOption}

@@ -1,0 +1,14 @@
+.kiwi-save-button {
+    background: #f29c55;
+    color: #fff;
+}
+
+.kiwi-save-button:hover {
+    background: #c97a2f;
+}
+
+.kiwi-save-icon {
+    height: 1.35rem;
+    width: 1.35rem;
+    object-fit: contain;
+}

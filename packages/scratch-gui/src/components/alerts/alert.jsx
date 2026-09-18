@@ -62,7 +62,7 @@ const AlertComponent = ({
                         )
                     }}
                 />
-            ) : content}
+            ) : (message || content)}
         </div>
         <div className={styles.alertButtons}>
             {showSaveNow && (

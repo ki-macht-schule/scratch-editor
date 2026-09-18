@@ -4,6 +4,7 @@ import keyMirror from 'keymirror';
 
 import successImage from '../assets/icon--success.svg';
 import failImage from '../assets/icon--error.svg';
+import {KIWI_LOGO_URL} from '../kiwi-project';
 
 const AlertTypes = keyMirror({
     STANDARD: null,
@@ -170,6 +171,55 @@ const alerts = [
         ),
         iconSpinner: true,
         level: AlertLevels.INFO
+    },
+    // Kiwi cookie-POST. STANDARD so the Alerts overlay shows them:
+    // SaveStatus is gated on canSave, which must stay false (MIT cloud).
+    // Copy matches JupyterLite (`Speichere in kiwi …` / envelope sentences).
+    {
+        alertId: 'kiwiSaving',
+        alertType: AlertTypes.STANDARD,
+        clearList: ['kiwiSaving', 'kiwiSaveSuccess', 'kiwiSavePartial'],
+        content: (
+            <FormattedMessage
+                defaultMessage="Speichere in kiwi …"
+                description="Kiwi save in progress"
+                id="kiwi.alerts.saving"
+            />
+        ),
+        iconSpinner: true,
+        iconURL: KIWI_LOGO_URL,
+        level: AlertLevels.SUCCESS
+    },
+    {
+        alertId: 'kiwiSaveSuccess',
+        alertType: AlertTypes.STANDARD,
+        clearList: ['kiwiSaving', 'kiwiSaveSuccess', 'kiwiSavePartial'],
+        content: (
+            <FormattedMessage
+                defaultMessage="In kiwi gespeichert."
+                description="Kiwi save succeeded"
+                id="kiwi.alerts.saveSuccess"
+            />
+        ),
+        iconURL: KIWI_LOGO_URL,
+        level: AlertLevels.SUCCESS,
+        maxDisplaySecs: 5
+    },
+    {
+        alertId: 'kiwiSavePartial',
+        alertType: AlertTypes.STANDARD,
+        clearList: ['kiwiSaving', 'kiwiSaveSuccess', 'kiwiSavePartial'],
+        closeButton: true,
+        content: (
+            <FormattedMessage
+                defaultMessage="Einige Dateien wurden nicht übernommen."
+                description="Kiwi save committed some files and rejected others"
+                id="kiwi.alerts.savePartial"
+            />
+        ),
+        iconURL: KIWI_LOGO_URL,
+        level: AlertLevels.WARN,
+        maxDisplaySecs: 8
     },
     {
         alertId: 'cloudInfo',
