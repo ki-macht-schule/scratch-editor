@@ -112,7 +112,7 @@ const fetchKiwiProjectBuffer = url =>
 const readSaveEnvelope = response =>
     response.json().catch(() => ({})).then(data => {
         if (!response.ok || !data || data.ok !== true) {
-            const error = new Error(data.error || KIWI_SAVE_ERROR);
+            const error = new Error(data.message || KIWI_SAVE_ERROR);
             error.code = data.code;
             throw error;
         }
