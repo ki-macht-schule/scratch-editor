@@ -29,7 +29,7 @@ const KiwiSaveButton = ({kiwiSaveUrl, onSaveToKiwi}) => {
 
     useEffect(() => {
         if (!kiwiSaveUrl) {
-            return undefined;
+            return () => {};
         }
         const onKey = event => {
             const modifier = event.metaKey || event.ctrlKey;

@@ -110,14 +110,16 @@ const fetchKiwiProjectBuffer = url =>
     });
 
 const readSaveEnvelope = response =>
-    response.json().catch(() => ({})).then(data => {
-        if (!response.ok || !data || data.ok !== true) {
-            const error = new Error(data.message || KIWI_SAVE_ERROR);
-            error.code = data.code;
-            throw error;
-        }
-        return data;
-    });
+    response.json()
+        .catch(() => ({}))
+        .then(data => {
+            if (!response.ok || !data || data.ok !== true) {
+                const error = new Error(data.message || KIWI_SAVE_ERROR);
+                error.code = data.code;
+                throw error;
+            }
+            return data;
+        });
 
 // POST the VM's .sb3 at the allowlisted save URL. Same JSON envelope as
 // Jupyter (`ok`, `committed`, `left_in_browser`, `rejected`).
@@ -126,14 +128,16 @@ const saveProjectToKiwi = vm => {
     if (!url) {
         return Promise.reject(new Error(KIWI_SAVE_ERROR));
     }
-    return vm.saveProjectSb3().then(blob =>
-        fetch(url, {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {'Content-Type': 'application/octet-stream'},
-            body: blob
-        })
-    ).then(readSaveEnvelope);
+    return vm.saveProjectSb3()
+        .then(blob =>
+            fetch(url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {'Content-Type': 'application/octet-stream'},
+                body: blob
+            })
+        )
+        .then(readSaveEnvelope);
 };
 
 export {
